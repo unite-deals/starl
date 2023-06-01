@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Object Distance Measurement</title>
+    <style>
+        body {
+            text-align: center;
+            background-color: #f2f2f2;
+        }
+        h1 {
+            margin-top: 20px;
+        }
+        #canvas {
+            margin-top: 20px;
+            border: 1px solid #000000;
+        }
+        #measurement {
+            margin-top: 10px;
+            color: #FF0000;
+            font-weight: bold;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Object Distance Measurement</h1>
+    <canvas id="canvas" width="640" height="480"></canvas>
+    <div id="measurement"></div>
+
+    <script>
+        var canvas = document.getElementById("canvas");
+        var ctx = canvas.getContext("2d");
+        var measurement = document.getElementById("measurement");
+        var referencePoints = [];
+
+        canvas.addEventListener("mousedown", handleMeasurementEvent);
+        canvas.addEventListener("touchstart", handleMeasurementEvent);
+
+        function handleMeasurementEvent(event) {
+            var x, y;
+            if (event.touches) {
+                event.preventDefault();
+                x = event.touches[0].clientX - canvas.getBoundingClientRect().left;
+                y = event.touches[0].clientY - canvas.getBoundingClientRect().top;
+            } else {
+                x = event.offsetX;
+                y = event.offsetY;
+            }
+
+            referencePoints.push({ x: x, y: y });
+
+            if (referencePoints.length === 1) {
+                drawMarker(x, y);
+            } else if (referencePoints.length === 2) {
+                drawMarker(x, y);
+                var distance = calculateDistance(referencePoints[0], referencePoints[1]);
+                measurement.innerHTML = "Distance: " + distance.toFixed(2) + " cm";
+            }
+        }
+
+        function drawMarker(x, y) {
+            ctx.beginPath();
+            ctx.arc(x, y, 5, 0, 2 * Math.PI);
+            ctx.fillStyle = "#FF0000";
+            ctx.fill();
+        }
+
+        function calculateDistance(point1, point2) {
+            var knownWidth = 20;  // Width of the object in cm
+            var focalLength = 500;  // Focal length in pixels
+
+            var dx = point2.x - point1.x;
+            var dy = point2.y - point1.y;
+            var pixelDistance = Math.sqrt(dx * dx + dy * dy);
+            var objectWidth = knownWidth * focalLength / pixelDistance;
+
+            return objectWidth;
+        }
+    </script>
+</body>
+</html>
